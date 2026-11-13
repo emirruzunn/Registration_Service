@@ -15,6 +15,9 @@ public class RegistrationRepository : IRegistrationRepository
     public Task<Registration?> GetByUserAndEventAsync(int userId, int eventId) =>
         _db.Registrations.FirstOrDefaultAsync(r => r.UserId == userId && r.EventId == eventId);
 
+    public Task<List<Registration>> GetAllAsync() =>
+        _db.Registrations.OrderByDescending(r => r.Id).ToListAsync();
+
     public Task<List<Registration>> GetByUserAsync(int userId) =>
         _db.Registrations.Where(r => r.UserId == userId).OrderBy(r => r.Id).ToListAsync();
 

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampusHub – Etkinlik Kayıt Paneli</title>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #3730a3;
+      --primary-hover: #312e81;
+      --blue: #2563eb;
+      --emerald-bg: #dcfce7;
+      --emerald-text: #15803d;
+      --emerald-solid: #10b981;
+      --danger-bg: #fee2e2;
+      --danger-text: #b91c1c;
+      --danger-border: #fca5a5;
+      --amber-bg: #fef3c7;
+      --amber-text: #b45309;
+      --slate-dark: #1e293b;
+      --radius: 14px;
+      --shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--emerald-bg);
+      color: var(--emerald-text);
+    }
+
+    .status-pill.offline {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-tab {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .nav-tab:hover {
+      background: #f8fafc;
+      color: var(--text);
+    }
+
+    .nav-tab.active {
+      background: #eef2ff;
+      color: var(--primary);
+      border-color: #c7d2fe;
+    }
+
+    .swagger-link {
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 9px;
+      text-decoration: none;
+    }
+
+    .swagger-link:hover {
+      background: #f8fafc;
+    }
+
+    /* Main container */
+    .container {
+      max-width: 1240px;
+      margin: 28px auto;
+      padding: 0 24px;
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .grid-main {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .grid-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .grid-main, .grid-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    .card-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .card-desc {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    .input {
+      width: 100%;
+      height: 42px;
+      padding: 0 13px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      font-size: 14px;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .btn-primary {
+      width: 100%;
+      height: 44px;
+      border: none;
+      border-radius: 10px;
+      background: var(--primary);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-blue {
+      height: 42px;
+      padding: 0 18px;
+      border: none;
+      border-radius: 9px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-blue:hover {
+      background: #1d4ed8;
+    }
+
+    .alert {
+      margin-top: 14px;
+      padding: 11px 14px;
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .alert.show { display: block; }
+    .alert.success { background: var(--emerald-bg); color: var(--emerald-text); }
+    .alert.error { background: var(--danger-bg); color: var(--danger-text); }
+
+    /* List header & filters */
+    .list-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 14px;
+      margin-bottom: 16px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 16px;
+    }
+
+    .filter-tab {
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 6px 2px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .filter-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .search-row .input {
+      width: 190px;
+      height: 38px;
+    }
+
+    .btn-ghost {
+      height: 38px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #fff;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-ghost:hover {
+      background: #f8fafc;
+    }
+
+    /* Table */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: #475569;
+      background: #f8fafc;
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge-ok {
+      background: var(--emerald-bg);
+      color: var(--emerald-text);
+    }
+
+    .badge-cancel {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+    }
+
+    .btn-cancel {
+      border: 1px solid var(--danger-border);
+      background: #fff;
+      color: var(--danger-text);
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-cancel:hover {
+      background: #fef2f2;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* Detail & API Preview View */
+    .query-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .detail-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      background: #f8fafc;
+    }
+
+    .detail-box h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .detail-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 14px;
+      color: #334155;
+      margin-bottom: 12px;
+    }
+
+    .http-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .http-pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--muted);
+      opacity: 0.65;
+    }
+
+    .http-pill.active-2xx {
+      opacity: 1;
+      background: var(--emerald-bg);
+      color: var(--emerald-text);
+      border-color: #86efac;
+    }
+
+    .http-pill.active-4xx {
+      opacity: 1;
+      background: var(--amber-bg);
+      color: var(--amber-text);
+      border-color: #fcd34d;
+    }
+
+    .http-pill.active-5xx {
+      opacity: 1;
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: var(--danger-border);
+    }
+
+    .json-box {
+      background: var(--slate-dark);
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 18px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+      min-height: 190px;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="brand-group">
+      <div class="brand">CampusHub</div>
+      <div id="healthPill" class="status-pill">
+        <span class="status-dot"></span>
+        <span id="healthText">Kontrol ediliyor...</span>
+      </div>
+    </div>
+    <nav class="nav-actions">
+      <button class="nav-tab active" data-view="dashboardView">Kayıt Paneli</button>
+      <button class="nav-tab" data-view="inspectorView">Kayıt Sorgulama ve Test</button>
+      <a class="swagger-link" href="/swagger" target="_blank">Swagger UI</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Görünüm 1: Ana Kayıt ve Yönetim Paneli -->
+    <section id="dashboardView" class="view active">
+      <div class="grid-main">
+        <div class="card">
+          <h2 class="card-title">Yeni Etkinlik Kaydı</h2>
+          <p class="card-desc">Yeni bir katılımcıyı etkinliğe kaydetmek için formu doldurun.</p>
+
+          <form id="registerForm">
+            <div class="field">
+              <label for="userIdInput">Kullanıcı ID</label>
+              <input id="userIdInput" class="input" type="number" min="1" placeholder="Örn: 42" required />
+            </div>
+            <div class="field">
+              <label for="eventIdInput">Etkinlik ID</label>
+              <input id="eventIdInput" class="input" type="number" min="1" placeholder="Örn: 31" required />
+            </div>
+            <button type="submit" class="btn-primary">Etkinliğe Kaydol +</button>
+          </form>
+
+          <div id="formAlert" class="alert"></div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Kayıt Listesi</h2>
+          <div class="list-toolbar">
+            <div class="filter-tabs">
+              <button class="filter-tab active" data-filter="all">Tümü</button>
+              <button class="filter-tab" data-filter="userId">Kullanıcıya Göre</button>
+              <button class="filter-tab" data-filter="eventId">Etkinliğe Göre</button>
+            </div>
+            <div class="search-row">
+              <input id="filterValueInput" class="input" type="number" min="1" placeholder="ID ile filtrele..." disabled />
+              <button id="applyFilterBtn" class="btn-ghost" type="button">Yenile</button>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Kayıt ID</th>
+                  <th>Kullanıcı</th>
+                  <th>Etkinlik</th>
+                  <th>Durum</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="registrationsTableBody">
+                <tr><td colspan="5" class="empty-state">Kayıtlar yükleniyor...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Görünüm 2: Kayıt Sorgulama ve Canlı API Yanıtı -->
+    <section id="inspectorView" class="view">
+      <div class="grid-split">
+        <div class="card">
+          <h2 class="card-title">Kayıt Detayı Sorgula</h2>
+          <p class="card-desc">Tek bir kaydın güncel durumunu ID ile sorgulayın.</p>
+
+          <form id="lookupForm" class="query-bar">
+            <input id="lookupIdInput" class="input" type="number" min="1" placeholder="Örn: 1" required />
+            <button type="submit" class="btn-blue">Sorgula</button>
+          </form>
+
+          <div id="lookupResult" class="detail-box">
+            <div style="color: var(--muted); font-size: 14px;">Sorgulamak için yukarıya bir Kayıt ID yazıp <strong>Sorgula</strong> butonuna basın.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title">Canlı Sistem Yanıtı</h2>
+          <p class="card-desc">Son yapılan API isteğinin HTTP durum kodu ve ham JSON çıktısı.</p>
+
+          <div class="http-pills">
+            <span id="pill-2xx" class="http-pill">200 / 201 Başarılı</span>
+            <span id="pill-404" class="http-pill">404 Bulunamadı</span>
+            <span id="pill-409" class="http-pill">409 Çakışma / Dolu</span>
+            <span id="pill-503" class="http-pill">503 Servis Ulaşılamıyor</span>
+          </div>
+
+          <div class="json-box">
+            <button id="copyJsonBtn" class="copy-btn" type="button">Kopyala</button>
+            <pre id="jsonOutput">{
+  "bilgi": "Henüz bir API isteği yapılmadı."
+}</pre>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const state = {
+      filterMode: "all",
+      lastJson: null
+    };
+
+    // Sekme geçişleri
+    document.querySelectorAll(".nav-tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.view).classList.add("active");
+      });
+    });
+
+    // Sağlık kontrolü (/health)
+    async function checkHealth() {
+      const pill = document.getElementById("healthPill");
+      const text = document.getElementById("healthText");
+      try {
+        const res = await fetch("/health");
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        pill.classList.remove("offline");
+        text.textContent = `Servis Aktif • v${data.version || "1.0.0"}`;
+      } catch {
+        pill.classList.add("offline");
+        text.textContent = "Servis Ulaşılamıyor";
+      }
+    }
+
+    // Canlı JSON ve HTTP durum rozetlerini güncelle
+    function updateInspector(statusCode, payload) {
+      ["pill-2xx", "pill-404", "pill-409", "pill-503"].forEach(id => {
+        document.getElementById(id).className = "http-pill";
+      });
+
+      if (statusCode >= 200 && statusCode < 300) {
+        document.getElementById("pill-2xx").classList.add("active-2xx");
+      } else if (statusCode === 404) {
+        document.getElementById("pill-404").classList.add("active-4xx");
+      } else if (statusCode === 409) {
+        document.getElementById("pill-409").classList.add("active-4xx");
+      } else if (statusCode >= 500) {
+        document.getElementById("pill-503").classList.add("active-5xx");
+      }
+
+      const formatted = JSON.stringify(payload, null, 2);
+      state.lastJson = formatted;
+      document.getElementById("jsonOutput").textContent = formatted;
+    }
+
+    function showFormAlert(message, isSuccess) {
+      const el = document.getElementById("formAlert");
+      el.textContent = message;
+      el.className = `alert show ${isSuccess ? "success" : "error"}`;
+    }
+
+    // Kayıtları listele
+    async function loadRegistrations() {
+      const tbody = document.getElementById("registrationsTableBody");
+      const filterVal = document.getElementById("filterValueInput").value.trim();
+
+      let url = "/registrations";
+      if (state.filterMode === "userId" && filterVal) {
+        url += `?userId=${encodeURIComponent(filterVal)}`;
+      } else if (state.filterMode === "eventId" && filterVal) {
+        url += `?eventId=${encodeURIComponent(filterVal)}`;
+      }
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        updateInspector(res.status, data);
+
+        if (!res.ok) {
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-state">${data.message || "Kayıtlar alınamadı."}</td></tr>`;
+          return;
+        }
+
+        if (!Array.isArray(data) || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Gösterilecek kayıt bulunamadı.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.map(item => {
+          const isRegistered = item.status === "REGISTERED";
+          const badge = isRegistered
+            ? `<span class="badge badge-ok">Kayıtlı</span>`
+            : `<span class="badge badge-cancel">İptal Edildi</span>`;
+          const action = isRegistered
+            ? `<button class="btn-cancel" onclick="cancelRegistration(${item.registrationId})">İptal Et</button>`
+            : `<span style="color: var(--muted); font-size: 13px;">—</span>`;
+
+          return `
+            <tr>
+              <td><strong>#REG-${String(item.registrationId).padStart(3, "0")}</strong></td>
+              <td>Kullanıcı #${item.userId}</td>
+              <td>Etkinlik #${item.eventId}</td>
+              <td>${badge}</td>
+              <td>${action}</td>
+            </tr>
+          `;
+        }).join("");
+      } catch {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Sunucuya bağlanılamadı.</td></tr>`;
+      }
+    }
+
+    // Yeni kayıt oluştur
+    document.getElementById("registerForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const userId = Number(document.getElementById("userIdInput").value);
+      const eventId = Number(document.getElementById("eventIdInput").value);
+
+      try {
+        const res = await fetch("/registrations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, eventId })
+        });
+        const data = await res.json();
+        updateInspector(res.status, data);
+
+        if (res.ok) {
+          showFormAlert(`Kayıt #${data.registrationId} başarıyla oluşturuldu.`, true);
+          e.target.reset();
+          loadRegistrations();
+        } else {
+          showFormAlert(`${data.error || "HATA"}: ${data.message || "Kayıt oluşturulamadı."}`, false);
+        }
+      } catch {
+        showFormAlert("Sunucuya bağlanılamadı.", false);
+      }
+    });
+
+    // Kayıt iptal et
+    async function cancelRegistration(id) {
+      try {
+        const res = await fetch(`/registrations/${id}`, { method: "DELETE" });
+        const data = await res.json();
+        updateInspector(res.status, data);
+        if (res.ok) {
+          showFormAlert(`Kayıt #${id} iptal edildi.`, true);
+          loadRegistrations();
+        } else {
+          showFormAlert(data.message || "İptal işlemi başarısız.", false);
+        }
+      } catch {
+        showFormAlert("Sunucuya bağlanılamadı.", false);
+      }
+    }
+    window.cancelRegistration = cancelRegistration;
+
+    // Filtre sekmeleri
+    document.querySelectorAll(".filter-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".filter-tab").forEach(t => t.classList.remove("active"));
+        tab.classList.add("active");
+        state.filterMode = tab.dataset.filter;
+
+        const input = document.getElementById("filterValueInput");
+        if (state.filterMode === "all") {
+          input.value = "";
+          input.disabled = true;
+          input.placeholder = "Tüm kayıtlar";
+          loadRegistrations();
+        } else {
+          input.disabled = false;
+          input.placeholder = state.filterMode === "userId" ? "Kullanıcı ID girin..." : "Etkinlik ID girin...";
+          input.focus();
+        }
+      });
+    });
+
+    document.getElementById("applyFilterBtn").addEventListener("click", loadRegistrations);
+
+    // Tekil kayıt sorgulama
+    document.getElementById("lookupForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = Number(document.getElementById("lookupIdInput").value);
+      const box = document.getElementById("lookupResult");
+
+      try {
+        const res = await fetch(`/registrations/${id}`);
+        const data = await res.json();
+        updateInspector(res.status, data);
+
+        if (res.ok) {
+          const isOk = data.status === "REGISTERED";
+          box.innerHTML = `
+            <h3>Kayıt #${data.registrationId}</h3>
+            <div class="detail-meta">
+              <div><strong>Kullanıcı ID:</strong> ${data.userId}</div>
+              <div><strong>Etkinlik ID:</strong> ${data.eventId}</div>
+            </div>
+            <span class="badge ${isOk ? "badge-ok" : "badge-cancel"}">
+              ${isOk ? "KAYITLI" : "İPTAL EDİLDİ"}
+            </span>
+          `;
+        } else {
+          box.innerHTML = `<div style="color: var(--danger-text); font-weight: 600;">${data.error}: ${data.message}</div>`;
+        }
+      } catch {
+        box.innerHTML = `<div style="color: var(--danger-text);">Sunucuya bağlanılamadı.</div>`;
+      }
+    });
+
+    // JSON kopyalama
+    document.getElementById("copyJsonBtn").addEventListener("click", async () => {
+      if (!state.lastJson) return;
+      await navigator.clipboard.writeText(state.lastJson);
+      const btn = document.getElementById("copyJsonBtn");
+      btn.textContent = "Kopyalandı";
+      setTimeout(() => (btn.textContent = "Kopyala"), 1500);
+    });
+
+    checkHealth();
+    loadRegistrations();
+  </script>
+</body>
+</html>

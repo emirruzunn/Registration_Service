@@ -50,6 +50,9 @@ public class RegistrationAppService : IRegistrationService
         return RegistrationResponse.From(r);
     }
 
+    public async Task<List<RegistrationResponse>> GetAllAsync() =>
+        (await _repo.GetAllAsync()).Select(RegistrationResponse.From).ToList();
+
     public async Task<List<RegistrationResponse>> GetByUserAsync(int userId) =>
         (await _repo.GetByUserAsync(userId)).Select(RegistrationResponse.From).ToList();
 

@@ -32,11 +32,9 @@ public class RegistrationsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<RegistrationResponse>>> List([FromQuery] int? userId, [FromQuery] int? eventId)
     {
-        if (userId is null && eventId is null)
-            throw new BadRequestException("INVALID_INPUT", "Provide userId or eventId query parameter.");
-        return userId is not null
-            ? Ok(await _service.GetByUserAsync(userId.Value))
-            : Ok(await _service.GetByEventAsync(eventId!.Value));
+        if (userId is not null) return Ok(await _service.GetByUserAsync(userId.Value));
+        if (eventId is not null) return Ok(await _service.GetByEventAsync(eventId.Value));
+        return Ok(await _service.GetAllAsync());
     }
 
     /// DELETE /registrations/{id}  (kaydi iptal eder)

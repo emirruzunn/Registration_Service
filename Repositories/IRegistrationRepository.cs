@@ -6,6 +6,7 @@ public interface IRegistrationRepository
 {
     Task<Registration?> GetByIdAsync(int id);
     Task<Registration?> GetByUserAndEventAsync(int userId, int eventId);
+    Task<List<Registration>> GetAllAsync();
     Task<List<Registration>> GetByUserAsync(int userId);
     Task<List<Registration>> GetByEventAsync(int eventId);
     Task<int> CountActiveByEventAsync(int eventId);

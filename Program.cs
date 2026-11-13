@@ -35,5 +35,7 @@ using (var scope = app.Services.CreateScope())
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.MapControllers();
 app.Run();
