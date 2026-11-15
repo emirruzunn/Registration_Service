@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/*.db
+.env
+.vs/
+.vscode/
+.git/
+.gitignore
+tests/
+mock-event-service/
+docker-compose.yml
+Dockerfile
+.dockerignore
+**/*.exe
