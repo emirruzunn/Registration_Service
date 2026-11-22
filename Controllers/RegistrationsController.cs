@@ -28,10 +28,12 @@ public class RegistrationsController : ControllerBase
     public async Task<ActionResult<RegistrationResponse>> GetById(int id) =>
         Ok(await _service.GetAsync(id));
 
-    /// GET /registrations?userId=42  veya  /registrations?eventId=31
+    /// GET /registrations?userId=42  veya  ?eventId=31  veya  ?userId=42&eventId=31
     [HttpGet]
     public async Task<ActionResult<List<RegistrationResponse>>> List([FromQuery] int? userId, [FromQuery] int? eventId)
     {
+        if (userId is not null && eventId is not null)
+            return Ok(await _service.GetByUserAndEventAsync(userId.Value, eventId.Value));
         if (userId is not null) return Ok(await _service.GetByUserAsync(userId.Value));
         if (eventId is not null) return Ok(await _service.GetByEventAsync(eventId.Value));
         return Ok(await _service.GetAllAsync());

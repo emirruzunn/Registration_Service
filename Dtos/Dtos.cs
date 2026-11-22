@@ -18,5 +18,6 @@ public record RegistrationResponse(int RegistrationId, int UserId, int EventId, 
 // Ortak hata formati: { "error": "...", "message": "..." }
 public record ErrorResponse(string Error, string Message);
 
-// Event Service'ten donen veri (GET /events/{id})
-public record EventInfo(int Id, string Title, int Capacity);
+// Event Service'ten donen veri (GET /events/{id}).
+// Capacity null ise (Event Service gondermediyse) kapasite kontrolu yapilmaz.
+public record EventInfo(int Id, string? Title, int? Capacity);

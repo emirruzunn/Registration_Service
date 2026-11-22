@@ -20,7 +20,8 @@ public class ApiTests : IDisposable
 {
     private readonly SqliteConnection _conn = new("Data Source=:memory:");
     private readonly FakeEventClient _events = new FakeEventClient()
-        .WithEvent(31, capacity: 100);
+        .WithEvent(31, capacity: 100)
+        .WithEvent(14, capacity: 50);
     private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
@@ -144,6 +145,19 @@ public class ApiTests : IDisposable
         var list = await _client.GetFromJsonAsync<List<RegistrationResponse>>("/registrations?userId=42");
 
         Assert.Single(list!);
+    }
+
+    [Fact]
+    public async Task Get_UserIdVeEventIdBirlikte_IkisineGoreFiltreler()
+    {
+        // Eskiden eventId yok sayiliyor, kullanicinin butun kayitlari donuyordu
+        await PostRegistration(42, 31);
+        await PostRegistration(42, 14);
+
+        var list = await _client.GetFromJsonAsync<List<RegistrationResponse>>("/registrations?userId=42&eventId=14");
+
+        Assert.Single(list!);
+        Assert.Equal(14, list![0].EventId);
     }
 
     [Fact]

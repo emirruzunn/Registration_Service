@@ -73,4 +73,34 @@ public class HttpEventClientTests
         var ex = await Assert.ThrowsAsync<ServiceUnavailableException>(() => client.GetEventAsync(31));
         Assert.Equal("EVENT_SERVICE_UNAVAILABLE", ex.Code);
     }
+
+    [Fact]
+    public async Task Status200AmaBozukJson_503InvalidResponse()
+    {
+        // Eskiden JsonException yakalanmiyordu ve servis 500 donuyordu
+        var client = Client(_ => Json(HttpStatusCode.OK, "bu json degil"));
+
+        var ex = await Assert.ThrowsAsync<ServiceUnavailableException>(() => client.GetEventAsync(31));
+        Assert.Equal("EVENT_SERVICE_INVALID_RESPONSE", ex.Code);
+    }
+
+    [Fact]
+    public async Task Status200AmaBosGovde_503InvalidResponse()
+    {
+        var client = Client(_ => Json(HttpStatusCode.OK, "null"));
+
+        var ex = await Assert.ThrowsAsync<ServiceUnavailableException>(() => client.GetEventAsync(31));
+        Assert.Equal("EVENT_SERVICE_INVALID_RESPONSE", ex.Code);
+    }
+
+    [Fact]
+    public async Task CapacityAlaniYoksa_CapacityNullOlur()
+    {
+        var client = Client(_ => Json(HttpStatusCode.OK, """{ "id": 31, "title": "Python Atolyesi" }"""));
+
+        var ev = await client.GetEventAsync(31);
+
+        Assert.NotNull(ev);
+        Assert.Null(ev!.Capacity);
+    }
 }

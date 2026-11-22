@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using RegistrationService.Dtos;
 using RegistrationService.Exceptions;
 
@@ -19,12 +20,20 @@ public class HttpEventClient : IEventClient
             if (!res.IsSuccessStatusCode)
                 throw new ServiceUnavailableException("EVENT_SERVICE_ERROR",
                     $"Event Service returned {(int)res.StatusCode}.");
-            return await res.Content.ReadFromJsonAsync<EventInfo>(cancellationToken: ct);
+            return await res.Content.ReadFromJsonAsync<EventInfo>(cancellationToken: ct)
+                ?? throw new ServiceUnavailableException("EVENT_SERVICE_INVALID_RESPONSE",
+                    "Event Service returned an empty response.");
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
         {
             throw new ServiceUnavailableException("EVENT_SERVICE_UNAVAILABLE",
                 "Event Service is unreachable or timed out.");
+        }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException)
+        {
+            // Event Service 200 dondu ama govde beklenen JSON degil: 500 ile cokmek yerine 503
+            throw new ServiceUnavailableException("EVENT_SERVICE_INVALID_RESPONSE",
+                "Event Service returned an invalid response.");
         }
     }
 }

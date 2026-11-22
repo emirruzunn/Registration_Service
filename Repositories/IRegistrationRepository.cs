@@ -12,4 +12,9 @@ public interface IRegistrationRepository
     Task<int> CountActiveByEventAsync(int eventId);
     Task<Registration> AddAsync(Registration registration);
     Task UpdateAsync(Registration registration);
+
+    /// work'u tek bir veritabani transaction'i icinde calistirir. SQLite'ta bu
+    /// "BEGIN IMMEDIATE" demektir: ayni anda gelen kayit istekleri kontrol + ekleme
+    /// adimlarini sirayla yapar, boylece kapasite asilmaz ve cift kayit olusmaz.
+    Task<T> InTransactionAsync<T>(Func<Task<T>> work);
 }

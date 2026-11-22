@@ -16,31 +16,39 @@ public class RegistrationAppService : IRegistrationService
     public async Task<RegistrationResponse> RegisterAsync(CreateRegistrationRequest req, CancellationToken ct = default)
     {
         // 1) Etkinlik var mi? (baska servisin DB'sine degil, API'sine soruyoruz)
+        //    HTTP cagrisi transaction'in disinda: veritabani kilidi gereksiz yere uzun tutulmasin.
         var ev = await _events.GetEventAsync(req.EventId, ct)
             ?? throw new NotFoundException("EVENT_NOT_FOUND", $"Event {req.EventId} does not exist.");
 
-        // 2) Mevcut kayit kontrolu
-        var existing = await _repo.GetByUserAndEventAsync(req.UserId, req.EventId);
-        if (existing is { Status: RegistrationStatus.REGISTERED })
-            throw new ConflictException("ALREADY_REGISTERED",
-                $"User {req.UserId} is already registered for event {req.EventId}.");
-
-        // 3) Kapasite kontrolu
-        var active = await _repo.CountActiveByEventAsync(req.EventId);
-        if (active >= ev.Capacity)
-            throw new ConflictException("EVENT_FULL", $"Event {req.EventId} is full.");
-
-        // 4) Iptal edilmis kaydi yeniden aktif et, yoksa yeni olustur
-        if (existing is not null)
+        // 2-4) Kontrol + kayit tek transaction icinde: ayni anda gelen istekler sirayla islenir
+        return await _repo.InTransactionAsync(async () =>
         {
-            existing.Status = RegistrationStatus.REGISTERED;
-            existing.CancelledAt = null;
-            await _repo.UpdateAsync(existing);
-            return RegistrationResponse.From(existing);
-        }
+            // 2) Mevcut kayit kontrolu
+            var existing = await _repo.GetByUserAndEventAsync(req.UserId, req.EventId);
+            if (existing is { Status: RegistrationStatus.REGISTERED })
+                throw new ConflictException("ALREADY_REGISTERED",
+                    $"User {req.UserId} is already registered for event {req.EventId}.");
 
-        var created = await _repo.AddAsync(new Registration { UserId = req.UserId, EventId = req.EventId });
-        return RegistrationResponse.From(created);
+            // 3) Kapasite kontrolu (Event Service kapasite gondermezse sinir yok sayilir)
+            if (ev.Capacity is int capacity)
+            {
+                var active = await _repo.CountActiveByEventAsync(req.EventId);
+                if (active >= capacity)
+                    throw new ConflictException("EVENT_FULL", $"Event {req.EventId} is full.");
+            }
+
+            // 4) Iptal edilmis kaydi yeniden aktif et, yoksa yeni olustur
+            if (existing is not null)
+            {
+                existing.Status = RegistrationStatus.REGISTERED;
+                existing.CancelledAt = null;
+                await _repo.UpdateAsync(existing);
+                return RegistrationResponse.From(existing);
+            }
+
+            var created = await _repo.AddAsync(new Registration { UserId = req.UserId, EventId = req.EventId });
+            return RegistrationResponse.From(created);
+        });
     }
 
     public async Task<RegistrationResponse> GetAsync(int id)
@@ -58,6 +66,16 @@ public class RegistrationAppService : IRegistrationService
 
     public async Task<List<RegistrationResponse>> GetByEventAsync(int eventId) =>
         (await _repo.GetByEventAsync(eventId)).Select(RegistrationResponse.From).ToList();
+
+    // "Bu kullanici bu etkinlige kayitli mi?" sorusu icin (etkinlik ekranindaki kayit durumu).
+    // Liste dondurur ki GET /registrations her zaman ayni sekilde (dizi) cevap versin.
+    public async Task<List<RegistrationResponse>> GetByUserAndEventAsync(int userId, int eventId)
+    {
+        var r = await _repo.GetByUserAndEventAsync(userId, eventId);
+        var result = new List<RegistrationResponse>();
+        if (r is not null) result.Add(RegistrationResponse.From(r));
+        return result;
+    }
 
     public async Task<RegistrationResponse> CancelAsync(int id)
     {
