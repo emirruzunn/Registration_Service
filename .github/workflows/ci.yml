@@ -21,3 +21,19 @@ jobs:
 
       - name: Docker imaji derleniyor mu?
         run: docker build -t registration-service .
+
+      # Servisi calistirip Swagger'dan guncel OpenAPI dokumanini alir.
+      # Diger gruplar (Gateway, entegrasyon reposu) bunu Actions > artifact'tan indirebilir.
+      - name: OpenAPI dokumanini uret
+        run: |
+          dotnet run --project RegistrationService.csproj > app.log 2>&1 &
+          for i in $(seq 1 30); do curl -fs http://localhost:8004/health > /dev/null && break; sleep 2; done
+          curl -fs http://localhost:8004/swagger/v1/swagger.json | jq . > openapi.json
+          if ! diff -q <(jq -S . docs/openapi.json) <(jq -S . openapi.json) > /dev/null 2>&1; then
+            echo "::warning::docs/openapi.json guncel degil. Bu calismanin 'openapi' artifact'indaki dosyayla degistirin."
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openapi
+          path: openapi.json
