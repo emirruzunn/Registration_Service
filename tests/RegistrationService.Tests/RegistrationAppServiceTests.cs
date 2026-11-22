@@ -13,7 +13,8 @@ public class RegistrationAppServiceTests : IDisposable
     private readonly TestDb _db = new();
     private readonly FakeEventClient _events = new FakeEventClient()
         .WithEvent(31, capacity: 100)
-        .WithEvent(7, capacity: 1);
+        .WithEvent(7, capacity: 1)
+        .WithEvent(55, capacity: null); // Event Service kapasite gondermiyor
 
     private RegistrationAppService CreateService() =>
         new(new RegistrationRepository(_db.CreateContext()), _events);
@@ -141,5 +142,36 @@ public class RegistrationAppServiceTests : IDisposable
 
         Assert.Single(list);
         Assert.Equal(42, list[0].UserId);
+    }
+
+    [Fact]
+    public async Task Register_KapasiteBilgisiYoksa_SinirsizKabulEdilir()
+    {
+        // Eskiden capacity alani gelmezse 0 sayiliyordu ve her kayit EVENT_FULL aliyordu
+        var first = await CreateService().RegisterAsync(Req(1, 55));
+        var second = await CreateService().RegisterAsync(Req(2, 55));
+
+        Assert.Equal("REGISTERED", first.Status);
+        Assert.Equal("REGISTERED", second.Status);
+    }
+
+    [Fact]
+    public async Task GetByUserAndEvent_SadeceEslesenKaydiDoner()
+    {
+        await CreateService().RegisterAsync(Req(42, 31));
+        await CreateService().RegisterAsync(Req(42, 7));
+
+        var list = await CreateService().GetByUserAndEventAsync(42, 31);
+
+        Assert.Single(list);
+        Assert.Equal(31, list[0].EventId);
+    }
+
+    [Fact]
+    public async Task GetByUserAndEvent_KayitYoksa_BosListe()
+    {
+        var list = await CreateService().GetByUserAndEventAsync(42, 31);
+
+        Assert.Empty(list);
     }
 }

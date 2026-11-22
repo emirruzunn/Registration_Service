@@ -13,7 +13,8 @@ public class FakeEventClient : IEventClient
     /// true ise Event Service'e ulasilamiyormus gibi davranir (503).
     public bool IsDown { get; set; }
 
-    public FakeEventClient WithEvent(int id, int capacity, string title = "Test Etkinligi")
+    /// capacity null verilirse Event Service kapasite gondermemis gibi davranir.
+    public FakeEventClient WithEvent(int id, int? capacity, string title = "Test Etkinligi")
     {
         _events[id] = new EventInfo(id, title, capacity);
         return this;

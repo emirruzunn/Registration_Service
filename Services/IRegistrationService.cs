@@ -9,5 +9,6 @@ public interface IRegistrationService
     Task<List<RegistrationResponse>> GetAllAsync();
     Task<List<RegistrationResponse>> GetByUserAsync(int userId);
     Task<List<RegistrationResponse>> GetByEventAsync(int eventId);
+    Task<List<RegistrationResponse>> GetByUserAndEventAsync(int userId, int eventId);
     Task<RegistrationResponse> CancelAsync(int id);
 }
