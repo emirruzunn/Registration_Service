@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using RegistrationService.Data;
 using RegistrationService.Middleware;
 using RegistrationService.Repositories;
@@ -25,7 +26,12 @@ builder.Services.AddHttpClient<IEventClient, HttpEventClient>(c =>
 builder.Services.AddControllers()
     .ConfigureApiBehaviorOptions(o => o.SuppressModelStateInvalidFilter = true);
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(o => o.SwaggerDoc("v1", new OpenApiInfo
+{
+    Title = "CampusHub Registration Service",
+    Version = "1.0.0",
+    Description = "Etkinlik kayit mikroservisi (Grup 4). Hata formati: { \"error\": \"...\", \"message\": \"...\" }"
+}));
 
 var app = builder.Build();
 
