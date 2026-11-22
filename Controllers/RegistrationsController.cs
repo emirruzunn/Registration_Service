@@ -5,7 +5,7 @@ using RegistrationService.Services;
 
 namespace RegistrationService.Controllers;
 
-// ProducesResponseType'lar Swagger / docs/openapi.json'da hata cevaplarinin da gorunmesi icin.
+// ProducesResponseType'lar Swagger / OpenAPI dokumaninda hata cevaplarinin da gorunmesi icin.
 [ApiController]
 [Route("registrations")]
 [Produces("application/json")]
