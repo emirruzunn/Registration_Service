@@ -5,6 +5,11 @@ ASP.NET Core 8 (C#) ile yazilmis etkinlik kayit mikroservisi. EF Core + SQLite k
 ## Katmanlar
 Controller -> Service -> Repository -> DbContext (SQLite). Event Service'e `IEventClient` ile HTTP uzerinden erisilir.
 
+## Dokumanlar
+- [docs/architecture.md](docs/architecture.md) – mimari, kayit akisi, veri modeli, hata yonetimi, dayaniklilik
+- [docs/api-contract.md](docs/api-contract.md) – diger gruplar icin API sozlesmesi (Gateway, Event Service, entegrasyon compose)
+- OpenAPI: calisirken `/swagger`, ya da Actions'taki son CI calismasinin `openapi` artifact'i
+
 ## Calistirma
 ASP.NET Core `.env` dosyasini kendiliginden okumaz. `dotnet run` ile calistirirken degiskenleri terminalde verin
 (`.env.example` Docker / entegrasyon compose'u icin referanstir):
